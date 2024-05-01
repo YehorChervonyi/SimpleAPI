@@ -2,14 +2,22 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/YehorChervonyi/SimpleAPI/internal/factorial"
 	"github.com/YehorChervonyi/SimpleAPI/internal/models"
+	"github.com/YehorChervonyi/SimpleAPI/internal/service"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"sync"
 )
 
-func CalculateFactorial(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+type FactorialHandler struct {
+	FactorialService *service.FactorialService
+}
+
+func NewFactorialHandler(factorialService *service.FactorialService) *FactorialHandler {
+	return &FactorialHandler{FactorialService: factorialService}
+}
+
+func (h *FactorialHandler) CalculateFactorial(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var request models.FactorialRequest
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&request); err != nil {
@@ -22,11 +30,11 @@ func CalculateFactorial(w http.ResponseWriter, r *http.Request, _ httprouter.Par
 	var aFactorial, bFactorial int
 	go func() {
 		defer wg.Done()
-		aFactorial = factorial.Calculate(request.A)
+		aFactorial = h.FactorialService.CalculateFactorial(request.A)
 	}()
 	go func() {
 		defer wg.Done()
-		bFactorial = factorial.Calculate(request.B)
+		bFactorial = h.FactorialService.CalculateFactorial(request.B)
 	}()
 
 	wg.Wait()
