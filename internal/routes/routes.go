@@ -7,7 +7,9 @@ import (
 )
 
 func InitRoutes(router *httprouter.Router) {
+	handlers.InitHandlers()
+	allHandlers := handlers.GetHandlers()
 	//POST
-	router.POST("/calculate", middleware.ValidateInput(handlers.CalculateFactorial))
+	router.POST("/calculate", middleware.ValidateInput(allHandlers.FactorialHandler.CalculateFactorial))
 
 }
